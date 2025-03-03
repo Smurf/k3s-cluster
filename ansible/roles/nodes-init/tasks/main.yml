@@ -1,0 +1,30 @@
+- name: Check dependencies
+  ansible.builtin.import_tasks:
+    file: dependencies.yml
+
+- name: Check for load balancer
+  debug:
+    msg: "lb_ip {{ lb_ip }} | lb_dns {{ lb_dns }}"
+  when: 
+    - lb_ip != ""
+    - lb_dns != ""
+  register: lb_enabled
+
+- name: Check for vip
+  debug:
+    msg: "vip_ip {{ vip_ip }}"
+  when: 
+    - vip_ip != ""
+  register: vip_enabled
+
+- name: Setup Cluster (HA+VIP(opt))
+  ansible.builtin.import_tasks:
+    file: ha-cluster.yml
+  when:
+    - lb_enabled is defined or vip_enabled is defined
+
+- name: Setup Cluster (Basic)
+  ansible.builtin.import_tasks:
+    file: basic-cluster.yml
+  when:
+    - lb_enabled is undefined

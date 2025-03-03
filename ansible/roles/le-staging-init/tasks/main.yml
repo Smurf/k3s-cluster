@@ -1,0 +1,11 @@
+- name: Install LE staging certificate
+  ansible.builtin.copy:
+    src: le-staging-x1.pem
+    dest: /etc/pki/ca-trust/source/anchors/le-staging-x1.pem
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Rebuild cert store
+  ansible.builtin.command:
+    cmd: update-ca-trust

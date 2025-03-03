@@ -1,0 +1,19 @@
+- name: Install rancher GPG Key
+  ansible.builtin.rpm_key:
+    state: present
+    key: https://rpm.rancher.io/public.key
+
+- name: Install k3s selinux release
+  ansible.builtin.dnf:
+    name: https://github.com/k3s-io/k3s-selinux/releases/download/v1.5.stable.1/k3s-selinux-1.5-1.el9.noarch.rpm
+    state: present
+
+- name: Install container selinux
+  ansible.builtin.dnf:
+    name: container-selinux
+    state: present
+
+- name: Install rsync
+  ansible.builtin.dnf:
+    name: rsync
+    state: present

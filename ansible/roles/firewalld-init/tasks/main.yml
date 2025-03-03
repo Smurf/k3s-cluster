@@ -1,0 +1,78 @@
+- name: Gather service info
+  ansible.builtin.service_facts:
+
+- name: Check for control_cidr
+  ansible.builtin.set_fact:
+    control_cidr_exists: (control_cidr is defined) and (control_cidr != "")
+
+- name: Enable IPv4 forwarding
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
+    state: present
+    reload: true
+
+- name: Setup firewall rules when firewalld is enabled
+  when:
+    - ansible_facts.services['firewalld.service'] is defined
+    - ansible_facts.services['firewalld.service'].state == 'running'
+  block:
+    - name: API Port enable
+      ansible.posix.firewalld:
+        port: "6443/tcp"
+        zone: internal
+        state: enabled
+        permanent: true
+        immediate: true
+    - name: etcd ports
+      ansible.posix.firewalld:
+        port: "2379-2381/tcp"
+        zone: internal
+        state: enabled
+        permanent: true
+        immediate: true
+    - name: Node comms (flannel vxlan, wg, metrics)
+      ansible.posix.firewalld:
+        port: "{{ item }}"
+        zone: internal
+        state: enabled
+        permanent: true
+        immediate: true
+      with_items:
+        - 51820/udp #wg v4
+        - 51821/udp #wg v6
+        - 5001/tcp #registry
+        - 8472/udp #flannel
+        - 10250/tcp #metrics
+    - name: Open FW for all node IPs
+      ansible.posix.firewalld:
+        source: "{{ item }}"
+        zone: internal
+        state: enabled
+        permanent: true
+        immediate: true
+      with_items: "{{ groups['nodes'] | list }}"
+    - name: Add pods subnet to trusted zone
+      ansible.posix.firewalld:
+        source: 10.42.0.0/16
+        zone: trusted
+        state: enabled
+        permanent: true
+        immediate: true
+    - name: Add services subnet to trusted zone
+      ansible.posix.firewalld:
+        source: 10.43.0.0/16
+        zone: trusted
+        state: enabled
+        permanent: true
+        immediate: true
+
+- name: Add control CIDR to firewall allow
+  ansible.builtin.firewalld:
+    source: "{{ control_cidr }}"
+    zone: internal
+    state: enabled
+    permanent: true
+    immediate: true
+  when: control_cidr_exists
+

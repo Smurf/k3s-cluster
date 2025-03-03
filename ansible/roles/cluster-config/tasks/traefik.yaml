@@ -1,0 +1,36 @@
+- name: Configuring Traefik
+  when: inventory_hostname == groups['nodes'][0]
+  block:
+  - name: Create temp dir for processed Traefik templates
+    delegate_to: localhost
+    ansible.builtin.tempfile:
+      state: directory
+      suffix: traefik_k3s
+    register: template_processing_dir
+  - name: Find traefik configuration files in manifests directory
+    delegate_to: localhost
+    ansible.builtin.find:
+      paths: "{{ traefik_manifest_path }}"
+      file_type: file
+      patterns: "*.yaml"
+    register: manifest_files
+  - name: Copy found manifests to temp dir "{{ template_processing_dir.path }}"
+    ansible.builtin.copy:
+      src: "{{ traefik_manifest_path }}"
+      dest: "{{ template_processing_dir.path }}"
+      force: true
+    delegate_to: localhost
+  - name: Process templates on localhost
+    ansible.builtin.template:
+      src: "{{ item.path }}"
+      dest: "{{ template_processing_dir.path }}/{{ (item.path | split('/'))[2:] |  join('/') }}"
+      mode: 0644
+    loop: "{{ manifest_files.files }}"
+    delegate_to: localhost
+  - name: Sync templates to node
+    ansible.builtin.copy:
+      src: "{{ template_processing_dir.path }}/"
+      dest: /var/lib/rancher/k3s/server/manifests/
+      owner: root
+      group: root
+      mode: 644

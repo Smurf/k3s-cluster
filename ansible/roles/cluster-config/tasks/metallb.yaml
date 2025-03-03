@@ -1,0 +1,42 @@
+- name: Configuring MetalLB
+  when: metallb == true and inventory_hostname == groups['nodes'][0]
+  block:
+  - name: Apply metallb manifest
+    ansible.builtin.shell:
+      cmd: |
+        kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml
+  - name: Create temp dir for processed metallb templates
+    delegate_to: localhost
+    ansible.builtin.tempfile:
+      state: directory
+      suffix: metallb_k3s
+    register: template_processing_dir
+  - name: Find metallb configuration files in manifests directory
+    delegate_to: localhost
+    ansible.builtin.find:
+      paths: "{{ metallb_manifest_path }}/"
+      file_type: file
+      patterns: "*.yaml"
+      recurse: true
+    register: manifest_files
+  - name: Copy found manifests to temp dir "{{ template_processing_dir.path }}"
+    ansible.builtin.copy:
+      src: "{{ metallb_manifest_path }}"
+      dest: "{{ template_processing_dir.path }}"
+      force: true
+    delegate_to: localhost
+  - name: Process templates on localhost
+    ansible.builtin.template:
+      src: "{{ item.path }}"
+      dest: "{{ template_processing_dir.path }}/{{ (item.path | split('/'))[2:] |  join('/') }}"
+      mode: 0644
+    loop: "{{ manifest_files.files }}"
+    delegate_to: localhost
+  - name: Debug - show all templates
+    ansible.builtin.debug:
+      var: "{{ item.path }}"
+    loop: "{{ manifest_files.files }}"
+  - name: Sync templates to node
+    ansible.posix.synchronize:
+      src: "{{ template_processing_dir.path }}/"
+      dest: /var/lib/rancher/k3s/server/manifests/

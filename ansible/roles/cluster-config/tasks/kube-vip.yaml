@@ -1,0 +1,23 @@
+- name: Setup kube-vip
+  when: vip == true and inventory_hostname == groups['nodes'][0]
+  block:
+    - name: Apply RBAC
+      ansible.builtin.shell:
+        cmd: kubectl apply -f https://kube-vip.io/manifests/rbac.yaml
+    - name: Pull kube-vip image
+      ansible.builtin.shell:
+        cmd: ctr image pull ghcr.io/kube-vip/kube-vip:v0.4.4
+    - name: Create manifest
+      ansible.builtin.shell:
+        cmd: |
+          alias kube-vip="ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v0.4.4 vip /kube-vip"
+          kube-vip manifest daemonset \
+          --interface eno2 \
+          --address {{ vip_ip }} \
+          --inCluster \
+          --taint \
+          --controlplane \
+          --arp \
+          --leaderElection | tee /var/lib/rancher/k3s/server/manifests/kube-vip.yaml
+
+

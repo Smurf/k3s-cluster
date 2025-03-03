@@ -1,0 +1,13 @@
+- name: Check for kube-vip
+  ansible.builtin.import_tasks:
+    file: kube-vip.yaml
+  when: vip == true
+
+- name: Check for MetalLB 
+  ansible.builtin.import_tasks:
+    file: metallb.yaml
+  when: metallb == true
+
+- name: Configure Traefik
+  ansible.builtin.import_tasks:
+    file: traefik.yaml

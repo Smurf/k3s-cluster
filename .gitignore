@@ -1,0 +1,11 @@
+*.live
+*.live.*
+*.swp
+*.swo
+ansible/group_vars/*
+!ansible/group_vars/*.example
+ansible/inventory/*.yaml
+!ansible/inventory/*.example
+haproxy/conf/*
+!haproxy/conf/*.example
+

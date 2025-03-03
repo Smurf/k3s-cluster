@@ -1,0 +1,60 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-world
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      name: web
+      protocol: TCP
+  selector:
+    app:  hello-world
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: hello-world
+  annotations:
+    spec.ingressClassName: "traefik"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`hello.lab.smurf.codes`)
+      kind: Rule
+      services:
+        - name: hello-world
+          port: 80
+  tls:
+    certResolver: cf_le
+    domains:
+      - main: "hello.lab.smurf.codes"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-world-nginx
+spec:
+  selector:
+    matchLabels:
+      app: hello-world
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: hello-world
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: hello-world-volume
+          mountPath: /usr/share/nginx/html/
+      volumes:
+      - name: hello-world-volume
+        configMap:
+          name: hello-world

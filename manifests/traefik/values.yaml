@@ -1,0 +1,91 @@
+#First create a PVC for Traefik
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 128Mi
+# values.yaml for Helm installation
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    persistence:
+      enabled: true
+      name: traefik # Must match PVC name
+      accessMode: ReadWriteOnce
+      size: 128Mi
+      path: /data  # This is where acme.json will be stored inside the container
+    env:
+      - name: CF_API_EMAIL
+        valueFrom:
+          secretKeyRef:
+            name: cloudflare-api-token-secret
+            key: email
+      - name: CF_DNS_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: cloudflare-api-token-secret
+            key: api-token
+    additionalArguments:
+      - "--api"
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--log.level=DEBUG"
+{% if traefik_cf_le %}
+      - "--certificatesresolvers.cf_le.acme.storage=/data/acme.json"
+      - "--certificatesresolvers.cf_le.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.cf_le.acme.dnschallenge=true"
+      - "--certificatesresolvers.cf_le.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.cf_le.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
+      - "--accesslog=true"
+{% endif %}
+    ingressRoute:
+      dashboard:
+        enabled: true
+    ports:
+      web:
+        port: 8000
+        exposedPort: 80
+        protocol: TCP
+      websecure:
+        port: 8443
+        exposedPort: 443
+        protocol: TCP
+      metrics:
+        port: 9100
+        exposedPort: 9100
+    providers:
+      kubernetesCRD:
+        allowCrossNamespace: true
+      kubernetesIngress:
+        enabled: true
+        allowExternalNameServices: true
+{% if traefik_cf_le %}
+    # This is required due to permissions issues with the default helm config
+    # This is only required for acme certs
+    deployment:
+      tolerations:
+      - key: node-role.node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      - key: node-role.node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoExecute
+      initContainers:
+      - name: volume-permissions
+        image: busybox:latest
+        command: ["sh", "-c", "ls -la /; touch /data/acme.json; chmod -Rv 600 /data/*"]
+        volumeMounts:
+          - name: traefik
+            mountPath: /data
+{% endif %}

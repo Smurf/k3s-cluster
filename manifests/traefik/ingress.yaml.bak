@@ -1,0 +1,35 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-http
+  namespace: default
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: PathPrefix(`/traefik`)
+      kind: Rule
+      services:
+        - name: dashboard@internal
+          kind: TraefikService
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-dashboard
+  namespace: default
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`traefik.lab.smurf.codes`)
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
+    - match: PathPrefix(`/traefik`)
+      kind: rule
+      services:
+        - name: dashboard@internal
+          kind: TraefikService

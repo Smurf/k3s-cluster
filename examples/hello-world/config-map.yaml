@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+data:
+  index.html: |
+    <html>
+    <head>
+      <title>Hello World!</title>
+    </head>
+    <body>Hello World!</body>
+    </html>
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2025-01-28T05:25:35Z"
+  name: hello-world
+  namespace: default
+  resourceVersion: "24948"
+  uid: 3de2fdf1-2c25-4a7c-a7ff-1b7ac029e788

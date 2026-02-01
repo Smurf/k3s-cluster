@@ -1,5 +1,5 @@
 ---
-- hosts: nodes
+- hosts: localhost
   gather_facts: true
   roles:
     - roles/firewalld-init

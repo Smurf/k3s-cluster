@@ -4,7 +4,7 @@
       curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server \
       --cluster-init
   when:
-    - inventory_hostname == groups['nodes'][0]
+    - node_role == "master"
 
 - name: Initialize all nodes with no load balancer
   ansible.builtin.shell:
@@ -12,4 +12,4 @@
       curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server \
       --server https://{{ groups['nodes'][0] }}:6443
   when: 
-    - inventory_hostname != groups['nodes'][0] 
+    - node_role != "master"

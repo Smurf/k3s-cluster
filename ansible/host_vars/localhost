@@ -1,0 +1,24 @@
+---
+k3s_token: "aylSUEpWTnJRY2FjI0F6N1NPXXlnMGZUCg=="
+
+# This is the cidr that will have access to 6443 to manage the nodes
+control_cidr: "192.168.1.22/32"
+
+# External LB, health check, tls termination
+ext_lb: true
+lb_dns: "k3s.lab.smurf.codes"
+lb_ip: "192.168.1.22"
+
+# VIP for control plane only
+vip: true
+vip_ip: "192.168.2.100"
+
+# metallb for servicelb
+metallb: true
+metallb_range: "192.168.2.100-192.168.2.200"
+metallb_manifest_path: "../manifests/metallb"
+
+# cloudflare certificates for traefik routes
+traefik_cf_le: true
+traefik_manifest_path: "../manifests/traefik"
+traefik_fqdn: "traefik.lab.smurf.codes"

@@ -1,5 +1,5 @@
 - name: Configuring MetalLB
-  when: metallb == true and inventory_hostname == groups['nodes'][0]
+  when: metallb == true and node_role == "master"
   block:
   - name: Apply metallb manifest
     ansible.builtin.shell:

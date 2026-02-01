@@ -1,5 +1,5 @@
 - name: Setup kube-vip
-  when: vip == true and inventory_hostname == groups['nodes'][0]
+  when: vip == true and node_role == "master"
   block:
     - name: Apply RBAC
       ansible.builtin.shell:
@@ -19,5 +19,3 @@
           --controlplane \
           --arp \
           --leaderElection | tee /var/lib/rancher/k3s/server/manifests/kube-vip.yaml
-
-

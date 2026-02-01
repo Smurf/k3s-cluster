@@ -1,0 +1,6 @@
+- name: Ensure that required vairables are defined
+  ansible.builtin.assert:
+    that:
+      - node_role is defined
+    fail_msg: "node_role not defined"
+    success_msg: "node role {{ node_role }}"

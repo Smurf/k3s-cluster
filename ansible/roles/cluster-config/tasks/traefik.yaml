@@ -1,5 +1,5 @@
 - name: Configuring Traefik
-  when: inventory_hostname == groups['nodes'][0]
+  when: node_role == "master"
   block:
   - name: Create temp dir for processed Traefik templates
     delegate_to: localhost

@@ -23,14 +23,14 @@
       --disable=servicelb \
       {{ tls_san }}
   when: 
-    - inventory_hostname == groups['nodes'][0]
+    - node_role == "master"
 
 - name: Initialize all nodes with load balancer
   ansible.builtin.shell:
     cmd: |
       curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server \
-      --server https://{{ groups['nodes'][0] }}:6443 \
+      --server https://{{ vip_ip }}:6443 \
       --disable=servicelb \
       {{ tls_san }}
   when: 
-    - lb_enabled is defined and inventory_hostname != groups['nodes'][0]
+    - lb_enabled is defined and node_role != "master"

@@ -2,7 +2,6 @@
 - hosts: nodes
   gather_facts: true
   roles:
-    - roles/assert
     - roles/firewalld-init
     - roles/le-staging-init
     - roles/nodes-init

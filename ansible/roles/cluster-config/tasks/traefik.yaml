@@ -37,4 +37,4 @@
       dest: /opt/k3s-master/
   - name: Deploy yaml files.
     ansible.builtin.shell:
-      cmd: "kubectl apply -f /opt/k3s-master/{{ template_processing_dir.path }}/*.yaml"
+      cmd: "kubectl apply -f /opt/k3s-master/traefik/*.yaml"

@@ -1,22 +1,19 @@
-#First create a PVC for Traefik
-{% raw %}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: traefik
   namespace: kube-system
   labels:
-    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/managed-by: Helm
   annotations:
-    meta.helm.sh/release-name: {{ .Release.Name | quote }}
-    meta.helm.sh/release-namespace: {{ .Relase.Namspace | quote }}
+    meta.helm.sh/release-name: traefik
+    meta.helm.sh/release-namespace: kube-system
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 128Mi
-{% endraw %}
 # values.yaml for Helm installation
 ---
 apiVersion: helm.cattle.io/v1
@@ -56,12 +53,12 @@ spec:
               - 1.0.0.1:53
           caServer: https://acme-staging-v02.api.letsencrypt.org/directory
 {% endif %}
-    api:
-      dashboard: true
-      insecure: true
-    accesslog: true
-    log:
-      level: DEBUG
+    additonalArguments:
+      - "--api"
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--log.level=DEBUG"
+      - "--accesslog=true"
     ingressRoute:
       dashboard:
         enabled: true

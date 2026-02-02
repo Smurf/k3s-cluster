@@ -37,4 +37,5 @@
       dest: /opt/k3s-master/
   - name: Deploy yaml files.
     ansible.builtin.shell:
-      cmd: "find /opt/k3s-master/metallb/ -name '*.yaml' -exec kubectl apply -f {} \;"
+      cmd: |
+        find /opt/k3s-master/metallb/ -name '*.yaml' -exec kubectl apply -f {} \;

@@ -35,6 +35,9 @@ metadata:
 spec:
   entryPoints:
     - web
+{% if traefik_fqdn and (traefik_fqdn|length > 0) and traefik_cf_le %}
+    - websecure
+{% endif %}
   routes:
 {% if traefik_fqdn and (traefik_fqdn|length > 0) %}
     - match: Host(`{{ traefik_fqdn }}`) || PathPrefix(`/`)
@@ -46,3 +49,9 @@ spec:
       services:
         - name: api@internal
           kind: TraefikService
+{% if traefik_fqdn and (traefik_fqdn|length > 0) and traefik_cf_le %}
+  tls:
+    certResolver: cf_le
+    domains:
+      - main: "{{ traefik_fqdn }}"
+{% endif %}

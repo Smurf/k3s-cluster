@@ -36,7 +36,14 @@
     ansible.builtin.debug:
       var: "{{ item.path }}"
     loop: "{{ manifest_files.files }}"
+  - name: Ensure /opt/k3s-master exists
+    ansible.builtin.file:
+      path: /opt/k3s-master
+      state: directory
   - name: Sync templates to node
     ansible.posix.synchronize:
       src: "{{ template_processing_dir.path }}/"
-      dest: /var/lib/rancher/k3s/server/manifests/
+      dest: /opt/k3s-master
+  - name: Deploy yaml files.
+    ansible.builtin.shell:
+      cmd: "kubectl apply -f /opt/k3s-master/{{ template_processing_dir.path }}/*.yaml"

@@ -1,4 +1,5 @@
 #First create a PVC for Traefik
+{% raw %}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -15,6 +16,7 @@ spec:
   resources:
     requests:
       storage: 128Mi
+{% endraw %}
 # values.yaml for Helm installation
 ---
 apiVersion: helm.cattle.io/v1

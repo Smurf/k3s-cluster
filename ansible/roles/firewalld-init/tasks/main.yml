@@ -46,12 +46,11 @@
         - 10250/tcp #metrics
     - name: Open FW for all node IPs
       ansible.posix.firewalld:
-        source: "{{ item }}"
+        source: "{{ ansible_default_ipv4.network }}/{{ ansible_default_ipv4.netmask }}"
         zone: internal
         state: enabled
         permanent: true
         immediate: true
-      with_items: "{{ ansible_facts['default_ipv4']['address'] | ansible.utils.ipaddr('network') }}"
     - name: Add pods subnet to trusted zone
       ansible.posix.firewalld:
         source: 10.42.0.0/16

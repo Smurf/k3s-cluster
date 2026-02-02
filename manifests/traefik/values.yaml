@@ -36,19 +36,25 @@ spec:
           secretKeyRef:
             name: cloudflare-api-token-secret
             key: api-token
-    additionalArguments:
-      - "--api"
-      - "--api.dashboard=true"
-      - "--api.insecure=true"
-      - "--log.level=DEBUG"
 {% if traefik_cf_le %}
-      - "--certificatesresolvers.cf_le.acme.storage=/data/acme.json"
-      - "--certificatesresolvers.cf_le.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory"
-      - "--certificatesresolvers.cf_le.acme.dnschallenge=true"
-      - "--certificatesresolvers.cf_le.acme.dnschallenge.provider=cloudflare"
-      - "--certificatesresolvers.cf_le.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
-      - "--accesslog=true"
+    certificatesResolvers:
+      cf_le:
+        acme:
+          email: me@smurf.codes
+          storage: /data/acme.json
+          dnsChallenge:
+            provider: cloudflare
+            resolvers:
+              - 1.1.1.1:53
+              - 1.0.0.1:53
+          caServer: https://acme-staging-v02.api.letsencrypt.org/directory
 {% endif %}
+    api:
+      dashboard: true
+      insecure: true
+    accesslog: true
+    log:
+      level: DEBUG
     ingressRoute:
       dashboard:
         enabled: true

@@ -4,6 +4,11 @@ kind: PersistentVolumeClaim
 metadata:
   name: traefik
   namespace: kube-system
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name | quote }}
+    meta.helm.sh/release-namespace: {{ .Relase.Namspace | quote }}
 spec:
   accessModes:
     - ReadWriteOnce

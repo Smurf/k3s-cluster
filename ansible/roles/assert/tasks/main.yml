@@ -4,3 +4,20 @@
       - node_role is defined
     fail_msg: "node_role not defined"
     success_msg: "node role {{ node_role }}"
+
+- name: If HA kube_vip must be configured
+  ansible.builtin.assert:
+    that:
+      - vip_ip is defined
+    fail_msg: "It appears an HA cluster wants to be setup. vip is configured but vip_ip has not been set."
+    success_msg: "virtual IP values set {{ vip_ip }} will be used."
+  when: vip is defined and vip == true
+
+- name: If HA metallb must be configured
+  ansible.builtin.assert:
+    that:
+      - metallb_range is defined
+      - metallb_manifest_path is defined
+    fail_msg: "metallb is {{ metallb }} indicating a HA setup. This requires metallb_range and metallb_manifest_path to be defined."
+    success_msg: "metallb range to be used {{ metallb_range }}"
+  when: metallb is defined and metallb == true

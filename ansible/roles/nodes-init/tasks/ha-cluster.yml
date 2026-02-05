@@ -1,4 +1,4 @@
-- name: Init value
+- name: Init tls_san value
   ansible.builtin.set_fact:
     tls_san: ""
 
@@ -15,7 +15,7 @@
   when:
     - vip_enabled is defined
 
-- name: Initialize first node with load balancer
+- name: Initialize first node in the cluster
   ansible.builtin.shell:
     cmd: |
       curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server \
@@ -25,7 +25,7 @@
   when: 
     - node_role == "master"
 
-- name: Initialize all nodes with load balancer
+- name: Initialize server node
   ansible.builtin.shell:
     cmd: |
       curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server \
@@ -33,4 +33,14 @@
       --disable=servicelb \
       {{ tls_san }}
   when: 
-    - lb_enabled is defined and node_role != "master"
+    - node_role == "server"
+
+- name: Initialize agent node
+  ansible.builtin.shell:
+    cmd: |
+      curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - agent \
+      --server https://{{ vip_ip }}:6443 \
+      --disable=servicelb \
+      {{ tls_san }}
+  when:
+    - node_role == "agent"

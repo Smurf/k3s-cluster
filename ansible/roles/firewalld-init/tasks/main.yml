@@ -22,6 +22,7 @@
         port: "6443/tcp"
         zone: internal
         state: enabled
+        offline: true
         permanent: true
         immediate: true
     - name: etcd ports
@@ -29,6 +30,7 @@
         port: "2379-2381/tcp"
         zone: internal
         state: enabled
+        offline: true
         permanent: true
         immediate: true
     - name: Node comms (flannel vxlan, wg, metrics)
@@ -36,6 +38,7 @@
         port: "{{ item }}"
         zone: internal
         state: enabled
+        offline: true
         permanent: true
         immediate: true
       with_items:
@@ -49,6 +52,7 @@
         source: "{{ ansible_default_ipv4.network }}/{{ ansible_default_ipv4.netmask }}"
         zone: internal
         state: enabled
+        offline: true
         permanent: true
         immediate: true
     - name: Add pods subnet to trusted zone
@@ -56,6 +60,7 @@
         source: 10.42.0.0/16
         zone: trusted
         state: enabled
+        offline: true
         permanent: true
         immediate: true
     - name: Add services subnet to trusted zone
@@ -63,6 +68,7 @@
         source: 10.43.0.0/16
         zone: trusted
         state: enabled
+        offline: true
         permanent: true
         immediate: true
 
@@ -71,6 +77,7 @@
     source: "{{ control_cidr }}"
     zone: internal
     state: enabled
+    offline: true
     permanent: true
     immediate: true
   when: control_cidr_exists

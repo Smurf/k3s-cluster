@@ -13,9 +13,6 @@
     reload: true
 
 - name: Setup firewall rules when firewalld is enabled
-  when:
-    - ansible_facts.services['firewalld.service'] is defined
-    - ansible_facts.services['firewalld.service'].state == 'running'
   block:
     - name: API Port enable
       ansible.posix.firewalld:

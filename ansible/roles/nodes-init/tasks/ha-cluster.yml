@@ -34,6 +34,7 @@
       {{ tls_san }}
   when: 
     - node_role == "server"
+  ignore_errors: yes
 
 - name: Initialize agent node
   ansible.builtin.shell:

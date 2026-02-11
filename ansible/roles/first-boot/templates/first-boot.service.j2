@@ -1,0 +1,16 @@
+[Unit]
+Description=K3s first boot config
+ConditionFirstBoot=yes
+WantedBy=multi-user.target
+# Ensure this service runs before first-boot-complete.target
+# for robustness in case of an aborted first boot.
+Before=first-boot-complete.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/ansible-pull -d /etc/local/ansible -C '{{ ansible_pull_branch }}' -U {{ ansible_pull_repo }} -e '@/opt/k3s-values.json' ansible/first-boot.yml
+# Optional: remove the script after a successful run
+ExecStartPost=/usr/bin/rm /k3s-values.json
+
+[Install]
+WantedBy=multi-user.target

@@ -7,6 +7,7 @@
   ansible.builtin.dnf:
     name: https://github.com/k3s-io/k3s-selinux/releases/download/v1.5.stable.1/k3s-selinux-1.5-1.el9.noarch.rpm
     state: present
+  ignore_errors: yes
 
 - name: Install container selinux
   ansible.builtin.dnf:

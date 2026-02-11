@@ -1,16 +1,4 @@
-- name: Save current k3s config for first boot
-  ansible.builtin.copy:
-    content: "{{ hostvars[inventory_hostname] | to_json }}"
-    dest: /opt/k3s-values.json
-    mode: '0600'
-
-- name: Create first boot service
-  ansible.builtin.template:
-    src: k3s-first-boot.service.j2
-    dest: /etc/systemd/system/k3s-first-boot.service
-    mode: '0644'
-
-- name: Enable first boot service
-  ansible.builtin.systemd:
-    name: k3s-first-boot.service
-    enabled: true
+- name: If master node create first boot tasks to init cluster
+  when: node_role == "master"
+  ansible.builtin.import_tasks:
+    file: first-boot.yml

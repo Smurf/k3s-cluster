@@ -12,7 +12,7 @@
         cmd: |
           alias kube-vip="ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v0.4.4 vip /kube-vip"
           kube-vip manifest daemonset \
-          --interface eno2 \
+          --autoInterface \
           --address {{ vip_ip }} \
           --inCluster \
           --taint \

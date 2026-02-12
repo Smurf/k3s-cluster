@@ -1,3 +1,8 @@
+- name: Capture ansible-pull metadata
+  set_fact:
+    ansible_pull_repo: "{{ lookup('pipe', 'git config --get remote.origin.url') }}"
+    ansible_pull_branch: "{{ lookup('pipe', 'git rev-parse --abbrev-ref HEAD') }}"
+
 - name: Save current k3s config for first boot
   ansible.builtin.copy:
     content: "{{ hostvars[inventory_hostname] | to_json }}"

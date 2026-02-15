@@ -12,7 +12,7 @@
         cmd: |
           alias kube-vip="ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v0.4.4 vip /kube-vip"
           kube-vip manifest daemonset \
-          --autoInterface \
+          --interface {{ ansible_default_ipv4.interface }} \
           --address {{ vip_ip }} \
           --inCluster \
           --taint \

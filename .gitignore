@@ -2,10 +2,10 @@
 *.live.*
 *.swp
 *.swo
-ansible/host_vars/*
 !ansible/host_vars/*.example
 ansible/inventory/*.yaml
 !ansible/inventory/*.example
 haproxy/conf/*
 !haproxy/conf/*.example
-
+.sops.yaml
+!*enc.yaml

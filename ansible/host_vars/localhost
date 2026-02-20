@@ -22,3 +22,6 @@ metallb_manifest_path: "../manifests/metallb"
 traefik_cf_le: true
 traefik_manifest_path: "../manifests/traefik"
 traefik_fqdn: "traefik.lab.smurf.codes"
+
+# secrets
+secrets_path: "../secret"

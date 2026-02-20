@@ -2,16 +2,14 @@
 
 This repo contains an ansible playbook, k8s manifests, and examples of simple deployments to easily get a k3s cluster up in a homelab environment.
 
-> **NOTE:** Currently this does not support agent ndoes. All nodes are master nodes.
-
 ## Prerequisites
 
 ### Compute Prerequisites
 
 1. 3 or more nodes to join the cluster
     - See [the official K3s Requirements documentation](https://docs.k3s.io/installation/requirements#server-sizing-guide) for sizing details.
-    - Since all nodes are server nodes some extra resources are required.
 2. Nodes **must** run a RHEL alike ala Rocky or Alama Linux
+    - Minimum version 9
 3. ssh access to each node
 4. root privileges on each node
 
@@ -27,59 +25,112 @@ This repo contains an ansible playbook, k8s manifests, and examples of simple de
 
 ## Using This Repo
 
+This repo is configured to use `ansible-pull` to automate k3s server creation at provisoning time.
+
 To create a k3s cluster first variables and hosts must be configured then the playbook is used to deploy the cluster.
 
 ### Configuring a cluster
 
-The cluster is configured via an inventory and group variables files.
+The cluster is configured via `host_vars`. See `ansible/host_vars/localhost.example`
 
-1. Create an inventory.
-    - See `ansible/inventory/cluster-inv.yaml.example`
-2. Set up variables for your cluster.
-    - See `ansible/group-vars/cluster.example`
+#### host_vars Configuration Options
 
-#### Configuration Options
+##### Cluster Parameters
 
 > **k3s_token** - The token to pass to the k3s init command. `pwgen 24 -y -s | base64`
 
 > **control_cidr** - The CIDR to allow 6443 access for kubectl outside the cluster.
 
-> **ext_lb** - Enable/disable an external load balancer.
-    - The `haproxy` folder contains an example container configuration for an external LB.
-> **lb_ip** - The IP of the external load balancer.
-> **lb_dns** - The FQDN of the external load balancer.
+##### kube-vip 
+
+kube-vip provides a highly avialable control plane IP.
 
 > **vip** - Enable/disable kube-vip
-> **vip_ip** - IP for cluster VIP
+
+> **vip_ip** - IP for cluster VIP.
+
+##### metallb
+
+metallb is used as a service load balancer. This provides IPs for services running in the cluster.
 
 > **metallb** - Enable/disable MetalLB as service load balancer.
+
 > **metallb_range** - IP range MetalLB can assign to services.
+
 > **metallb_manifest_path** - Path to the manifests for metallb
 
-> **traefik_cf_le** - Enable/disable acme letsencrypt certificates.
+##### traefik
+
+traefik is used for ssl termination, path based routing, and middlewares.
+
+> **traefik_cf_le** - Enable/disable acme letsencrypt certificates. **By default this playbook uses the LE Staging CA.**
+
 > **traefik_fqdn** - FQDN to access traefik via service load balancer.
+
 > **traefik_manifest_path** - Path to the manifests for traefik.
 
-### Letsencrypt certificates
+##### secrets
 
-See `secret/cloudflare.yaml.example` for an example yaml file.
+> **secrets_path** - Path to sops encrypted `*.enc.yaml` files.
 
-> **NOTE:** These values are **base64** encoded. `echo -n $value | base64`
+Secrets use [sops](https://github.com/getsops/sops) to encrypt values in the yaml files. The master node **must** have a corresponding way to decrypt this secret. 
+
+The playbook copies any `*.enc.yaml` files in the `secrets_path` to the master node and uses sops to decrypt it.
+
+```
+$ sops -e secret/cloudflare.yaml.example > secret/cloudflare.enc.yaml.example
+```
+
+##### External Load Balancer (optional)
+
+An external load balancer can be used for SSL termination and routing if desired.
+
+The `haproxy` folder contains an example container configuration for an external LB.
+
+> **ext_lb** - Enable/disable an external load balancer. (Optional)
+
+> **lb_ip** - The IP of the external load balancer.
+
+> **lb_dns** - The FQDN of the external load balancer.
+
 
 ### Deploying a cluster
 
-1. Run the ansible playbook
-    - `ansible-playbook ansible/lab-cluster.yaml -i ansible/inventory/cluster-inv.yaml -u root`
-    - If key based auth is not configured adding `--ask-pass`
-    - If a non-root user is used to authenticate `--become` may be required.
+#### Deploy Master Node
+
+A master node is a server node and the first node in the cluster.
+
+The master node is responsible for bootstrapping the cluster. This node applies the initial configurations to provide minium configuration for further nodes to join.
+
+1. Run the ansible playbook setting the `node_role` variable
+    - `ansible-pull -d /etc/local/ansible -C 'ansible-pull' -U https://github.com/Smurf/k3s-cluster.git -e "node_role=master" ansible/local.yml`
 2. Copy the kubectl from the fist node to `~/.kube/config` and modify the `server` value to the `kube-vip` IP
-    - Optionally you may run the haproxy container on your own device to round robin nodes.
     - Optionally but not recommended you may just use the IP of the first node.
-3. `k get nodes` should show all nodes in the cluster
-4. `k get svc -A`
+3. `kubectl get nodes` should show the master node
+4. `kubectl get svc -A`
     - Traefik should be accessable via External-IP shown.
 
+> **NOTE:** This playbook supports kickstarting the master node. To enable this set `-e "kickstart=true` in the `ansible-pull` command.
+
+#### Deploy a Server Node
+
+Server nodes run the control plane and workloads. Clusters should contain a minimum of three server nodes.
+
+To deploy a server node simply pull the playbook with the appropriate role selected.
+```
+ansible-pull -d /etc/local/ansible -C 'ansible-pull' -U https://github.com/Smurf/k3s-cluster.git -e "node_role=agent" ansible/local.yml
+```
+
+#### Deploy a Worker Node
+
+Worker nodes only run workloads.
+```
+ansible-pull -d /etc/local/ansible -C 'ansible-pull' -U https://github.com/Smurf/k3s-cluster.git -e "node_role=server" ansible/local.yml
+```
+
 ### Deploying A Test Application
+
+This repo contains a simple hello world application to test traefik's web and websecure endpoints. This ensures that automatic LE certificate issuance is working.
 
 #### Simple Hello World
 
@@ -91,8 +142,9 @@ See `secret/cloudflare.yaml.example` for an example yaml file.
 
 This repo contains configuration for using cloudflare DNS and letsencrypt to create certificates for all routes with a `Host` rule.
 
-1. Rename and edit `secret/cloudflare.yaml.example`
-    - Add your CF API token and email address
+1. Ensure that the `cloudflare-api-token-secret` exists
+    - `kubectl get secrets --all-namespaces | grep cloudflare`
+    - This secret should be automatically provisioned via ansible the master node and applied using `sops`. See the [secrets configuration section](#secrets) for details
 2. Edit `examples/hello-world/tls/hello-world.yaml` to point to your own FQDN.
     - Ensure a DNS entry exists
 2. `kubectl apply -f examples/hello-world/config-map.yaml`

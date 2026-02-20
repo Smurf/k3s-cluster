@@ -5,6 +5,7 @@ k3s_token: "aylSUEpayyyyyylmaoZUCg=="
 control_cidr: "10.0.0.10/32"
 
 # External LB, health check, tls termination
+ext_lb: false
 lb_dns: "k3s.lab.smurf.codes"
 lb_ip: "10.0.0.10"
 
@@ -23,3 +24,6 @@ traefik_cf_le: true
 traefik_fqdn: "traefik.example.com"
 # manifests for configuring traefik
 traefik_manifest_path: "../manifests/traefik"
+
+# secrets
+secrets_path: "../secret"

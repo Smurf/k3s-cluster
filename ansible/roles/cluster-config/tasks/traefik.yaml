@@ -2,13 +2,11 @@
   when: node_role == "master"
   block:
   - name: Create temp dir for processed Traefik templates
-    delegate_to: localhost
     ansible.builtin.tempfile:
       state: directory
       suffix: traefik_k3s
     register: template_processing_dir
   - name: Find traefik configuration files in manifests directory
-    delegate_to: localhost
     ansible.builtin.find:
       paths: "{{ traefik_manifest_path }}"
       file_type: file
@@ -24,13 +22,8 @@
     ansible.builtin.template:
       src: "{{ item.path }}"
       dest: "{{ template_processing_dir.path }}/{{ (item.path | split('/'))[2:] |  join('/') }}"
-      mode: 0644
+      mode: "0644"
     loop: "{{ manifest_files.files }}"
-    delegate_to: localhost
-  - name: Ensure /opt/k3s-master exists
-    ansible.builtin.file:
-      path: /opt/k3s-master
-      state: directory
   - name: Sync templates to node
     ansible.posix.synchronize:
       src: "{{ template_processing_dir.path }}/"

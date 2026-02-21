@@ -1,0 +1,53 @@
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  valuesContent: |-
+    prometheus:
+      prometheusSpec:
+        retention: {{ prometheus_retention }}
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-path
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: {{ prometheus_storage }}
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+    grafana:
+      persistence:
+        enabled: true
+        storageClassName: local-path
+        size: {{ grafana_storage }}
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      adminPassword: admin
+      service:
+        type: ClusterIP
+      ingress:
+        enabled: false
+    alertmanager:
+      alertmanagerSpec:
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-path
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 1Gi

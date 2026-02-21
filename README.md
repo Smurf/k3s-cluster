@@ -81,6 +81,22 @@ The playbook copies any `*.enc.yaml` files in the `secrets_path` to the master n
 $ sops -e secret/cloudflare.yaml.example > secret/cloudflare.enc.yaml.example
 ```
 
+##### monitoring
+
+Monitoring uses the [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) Helm chart to deploy Prometheus, Grafana, Alertmanager, and related exporters.
+
+> **monitoring** - Enable/disable monitoring stack.
+
+> **monitoring_manifest_path** - Path to the manifests for monitoring configuration.
+
+> **grafana_fqdn** - FQDN to access Grafana via Traefik ingress.
+
+> **prometheus_retention** - Prometheus data retention period (default: 15d).
+
+> **prometheus_storage** - Prometheus persistent storage size.
+
+> **grafana_storage** - Grafana persistent storage size.
+
 ##### External Load Balancer (optional)
 
 An external load balancer can be used for SSL termination and routing if desired.

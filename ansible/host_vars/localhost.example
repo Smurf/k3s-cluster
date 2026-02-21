@@ -27,3 +27,11 @@ traefik_manifest_path: "../manifests/traefik"
 
 # secrets
 secrets_path: "../secret"
+
+# monitoring
+monitoring: true
+monitoring_manifest_path: "../manifests/monitoring"
+grafana_fqdn: "grafana.example.com"
+prometheus_retention: "15d"
+prometheus_storage: "10Gi"
+grafana_storage: "5Gi"

@@ -44,6 +44,7 @@
         - 5001/tcp #registry
         - 8472/udp #flannel
         - 10250/tcp #metrics
+        - 9100/tcp #node-exporter
     - name: Open FW for all node IPs
       ansible.posix.firewalld:
         source: "{{ ansible_default_ipv4.network }}/{{ ansible_default_ipv4.netmask }}"

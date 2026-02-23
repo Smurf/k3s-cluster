@@ -29,7 +29,7 @@ secrets_path: "../secret"
 # monitoring
 monitoring: true
 monitoring_manifest_path: "../manifests/monitoring"
-grafana_fqdn: "grafana.example.com"
+grafana_fqdn: "grafana.lab.smurf.codes"
 prometheus_retention: "15d"
 prometheus_storage: "10Gi"
 grafana_storage: "5Gi"

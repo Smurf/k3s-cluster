@@ -1,6 +1,14 @@
 - name: Configuring Monitoring
   when: monitoring == true and node_role == "master"
   block:
+  - name: Enable node-exporter port in trusted firewalld zone
+    ansible.posix.firewalld:
+      port: 9100/tcp
+      zone: internal
+      state: enabled
+      offline: true
+      permanent: true
+      immediate: true
   - name: Create temp dir for processed monitoring templates
     delegate_to: localhost
     ansible.builtin.tempfile:

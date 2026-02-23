@@ -29,6 +29,9 @@ spec:
       accessMode: ReadWriteOnce
       size: 128Mi
       path: /data  # This is where acme.json will be stored inside the container
+    logs:
+      access:
+        enabled: true
     env:
       - name: CF_API_EMAIL
         valueFrom:

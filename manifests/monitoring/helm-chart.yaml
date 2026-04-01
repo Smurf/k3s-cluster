@@ -16,7 +16,6 @@ spec:
   chart: kube-prometheus-stack
   targetNamespace: monitoring
   createNamespace: true
-  version: 65.5.1
   valuesContent: |-
     prometheus:
       prometheusSpec:
@@ -29,6 +28,12 @@ spec:
                 requests:
                   storage: {{ prometheus_storage }}
     grafana:
+      initChownData:
+        enabled: false
+      podSecurityContext:
+        fsGroup: 472
+        runAsGroup: 472
+        runAsUser: 472
       persistence:
         enabled: true
         size: {{ grafana_storage }}

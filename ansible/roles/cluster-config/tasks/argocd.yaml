@@ -12,3 +12,46 @@
   ansible.builtin.shell:
     cmd: kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
   when: not argocd_ha
+
+- name: Applying argocd manifests
+  when: argocd == true and node_role == "master"
+  block:
+  - name: Create temp dir for processed argocd templates
+    delegate_to: localhost
+    ansible.builtin.tempfile:
+      state: directory
+      suffix: argocd_k3s
+    register: template_processing_dir
+  - name: Find monitoring configuration files in manifests directory
+    delegate_to: localhost
+    ansible.builtin.find:
+      paths: "{{ argocd_manifest_path }}"
+      file_type: file
+      patterns: "*.yaml"
+      recurse: true
+    register: manifest_files
+  - name: Copy found manifests to temp dir "{{ template_processing_dir.path }}"
+    ansible.builtin.copy:
+      src: "{{ argocd_manifest_path }}/"
+      dest: "{{ template_processing_dir.path }}"
+      force: true
+    delegate_to: localhost
+  - name: Process templates on localhost
+    ansible.builtin.template:
+      src: "{{ item.path }}"
+      dest: "{{ template_processing_dir.path }}/{{ (item.path | split('/'))[2:] |  join('/') }}"
+      mode: "0644"
+    loop: "{{ manifest_files.files }}"
+    delegate_to: localhost
+  - name: Ensure /opt/k3s-master exists
+    ansible.builtin.file:
+      path: /opt/k3s-master
+      state: directory
+  - name: Sync templates to node
+    ansible.posix.synchronize:
+      src: "{{ template_processing_dir.path }}/"
+      dest: /opt/k3s-master/argocd
+  - name: Deploy yaml files.
+    ansible.builtin.shell:
+      cmd: |
+        find /opt/k3s-master/argocd/ -name '*.yaml' -exec kubectl apply -f {} \;

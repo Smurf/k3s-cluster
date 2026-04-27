@@ -13,6 +13,9 @@ lb_ip: "192.168.1.22"
 vip: true
 vip_ip: "192.168.2.100"
 
+# manifest info
+manifest_path: "../manifests"
+
 # metallb for servicelb
 metallb: true
 metallb_range: "192.168.2.101-192.168.2.200"
@@ -36,4 +39,5 @@ grafana_storage: "5Gi"
 
 # argocd
 argocd: true
+argocd_manifest_path: "../manifests/argocd"
 argocd_ha: true

@@ -25,7 +25,7 @@
     register: manifest_files
   - name: Copy found manifests to temp dir "{{ template_processing_dir.path }}"
     ansible.builtin.copy:
-      src: "{{ monitoring_manifest_path }}"
+      src: "{{ monitoring_manifest_path }}/"
       dest: "{{ template_processing_dir.path }}"
       force: true
     delegate_to: localhost
@@ -43,7 +43,7 @@
   - name: Sync templates to node
     ansible.posix.synchronize:
       src: "{{ template_processing_dir.path }}/"
-      dest: /opt/k3s-master
+      dest: /opt/k3s-master/monitoring
   - name: Deploy yaml files.
     ansible.builtin.shell:
       cmd: |

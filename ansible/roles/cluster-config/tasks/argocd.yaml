@@ -32,7 +32,7 @@
     register: manifest_files
   - name: Copy found manifests to temp dir "{{ template_processing_dir.path }}"
     ansible.builtin.copy:
-      src: "{{ argocd_manifest_path }}/"
+      src: "{{ argocd_manifest_path }}"
       dest: "{{ template_processing_dir.path }}"
       force: true
     delegate_to: localhost

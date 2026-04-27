@@ -4,10 +4,12 @@
 
 - name: Apply latest Argocd HA Manifest
   ansible.builtin.shell:
-    cmd: kubectl apply -n argocd --server-side --force-conflicts -f https://github.com/argoproj/argo-cd/blob/master/manifests/ha/install.yaml 
+    cmd: kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/ha/install.yaml
+  ignore_errors: true
   when: argocd_ha
 
 - name: Apply Argocd Manifest (non-HA)
   ansible.builtin.shell:
     cmd: kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-    when: not argocd_ha
+  ignore_errors: true
+  when: not argocd_ha

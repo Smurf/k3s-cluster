@@ -33,3 +33,7 @@ grafana_fqdn: "grafana.lab.smurf.codes"
 prometheus_retention: "15d"
 prometheus_storage: "10Gi"
 grafana_storage: "5Gi"
+
+# argocd
+argocd: true
+argocd_ha: true

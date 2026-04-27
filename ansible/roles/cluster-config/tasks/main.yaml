@@ -13,12 +13,12 @@
 - name: Check for kube-vip
   ansible.builtin.import_tasks:
     file: kube-vip.yaml
-  when: vip == true
+  when: vip
 
 - name: Check for MetalLB 
   ansible.builtin.import_tasks:
     file: metallb.yaml
-  when: metallb == true
+  when: metallb
 
 - name: Configure Traefik
   ansible.builtin.import_tasks:
@@ -27,4 +27,9 @@
 - name: Configure Monitoring
   ansible.builtin.import_tasks:
     file: monitoring.yaml
-  when: monitoring == true
+  when: monitoring
+
+- name: Configure ArgoCD
+  ansible.builtin.import_tasks:
+    file: argocd.yaml
+  when: argocd

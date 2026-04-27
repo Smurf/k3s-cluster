@@ -33,3 +33,8 @@
   ansible.builtin.import_tasks:
     file: argocd.yaml
   when: argocd
+ 
+- name: Deploy yaml files.
+  ansible.builtin.shell:
+    cmd: |
+      find /opt/k3s-master/ -name '*.yaml' -exec kubectl apply -f {} \;

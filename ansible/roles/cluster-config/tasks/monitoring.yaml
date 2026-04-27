@@ -32,8 +32,7 @@
   - name: Process templates on localhost
     ansible.builtin.template:
       src: "{{ item.path }}"
-      #dest: "{{ template_processing_dir.path }}/{{ (item.path | split('/'))[2:] |  join('/') }}"
-      dest: "{{ template_processing_dir.path }}/"
+      dest: "{{ template_processing_dir.path }}/{{ (item.path | split('/'))[2:] |  join('/') }}"
       mode: "0644"
     loop: "{{ manifest_files.files }}"
     delegate_to: localhost
@@ -44,8 +43,4 @@
   - name: Sync templates to node
     ansible.posix.synchronize:
       src: "{{ template_processing_dir.path }}/"
-      dest: /opt/k3s-master/monitoring
-  - name: Deploy yaml files.
-    ansible.builtin.shell:
-      cmd: |
-        find /opt/k3s-master/monitoring/ -name '*.yaml' -exec kubectl apply -f {} \;
+      dest: /opt/k3s-master

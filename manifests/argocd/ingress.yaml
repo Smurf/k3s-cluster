@@ -8,13 +8,13 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`argocd.smurf.codes`)
+      match: Host(`{{ argocd_fqdn }}`)
       priority: 10
       services:
         - name: argocd-server
           port: 80
     - kind: Rule
-      match: Host(`argocd.smurf.codes`) && Header(`Content-Type`, `application/grpc`)
+      match: Host(`{{ argocd_fqdn }}`) && Header(`Content-Type`, `application/grpc`)
       priority: 11
       services:
         - name: argocd-server

@@ -12,7 +12,8 @@ spec:
       priority: 10
       services:
         - name: argocd-server
-          port: 80
+          port: 443
+          serversTransport: argocd-transport
     - kind: Rule
       match: Host(`{{ argocd_fqdn }}`) && Header(`Content-Type`, `application/grpc`)
       priority: 11

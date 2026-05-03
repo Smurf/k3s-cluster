@@ -9,7 +9,7 @@ spec:
   routes:
     - kind: Rule
       match: Host(`{{ argocd_fqdn }}`)
-      priority: 10
+      priority: 100
       services:
         - name: argocd-server
           port: 443

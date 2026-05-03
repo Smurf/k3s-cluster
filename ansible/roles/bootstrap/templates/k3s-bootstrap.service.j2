@@ -5,7 +5,7 @@ After=k3s.service
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c "ansible-galaxy collection install ansible.utils ansible.posix --force; /usr/bin/ansible-pull -d /etc/local/ansible -C '{{ ansible_pull_branch }}' -U {{ ansible_pull_repo }} -e '@/opt/k3s-values.json' ansible/first-boot.yml" 
+ExecStart=/bin/bash -c "ansible-galaxy collection install ansible.utils ansible.posix --force; /usr/bin/ansible-pull -d /etc/local/ansible -C '{{ ansible_pull_branch }}' -U {{ ansible_pull_repo }} -e '@/opt/k3s-values.json' ansible/bootstrap.yaml" 
 ExecStartPost=/usr/bin/systemctl mask k3s-bootstrap.service
 
 [Install]

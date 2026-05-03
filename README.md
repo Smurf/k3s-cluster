@@ -35,6 +35,8 @@ The cluster is configured via `host_vars`. See `ansible/host_vars/localhost.exam
 
 #### host_vars Configuration Options
 
+Deployed clusters are configured through a set of host variables. These variables control cluster wide values such as the k3s token and which features are enabled on the depolyed cluster.
+
 ##### Cluster Parameters
 
 > **k3s_token** - The token to pass to the k3s init command. `pwgen 24 -y -s | base64`
@@ -97,6 +99,24 @@ Monitoring uses the [kube-prometheus-stack](https://github.com/prometheus-commun
 
 > **grafana_storage** - Grafana persistent storage size.
 
+##### ArgoCD
+
+> **NOTE:** This requires having Traefik configured with LetsEncrypt.
+
+ArgoCD can be deployed to the cluster.
+
+> **argocd** - Enable/disable ArgoCD deployment
+
+> **argocd_manifests_path** - Path to ArgoCD manifests to use.
+
+> **argocd_fqdn** - FQDN of ArgoCD.
+
+> **argocd_ha** - Enable/disable ArgoCD in HA mode.
+
+##### System Update Controller (SUC)
+
+> **system_update** - Enable/disable the system-update-controller to automatically update the k3s stack to latest stable.
+
 ##### External Load Balancer (optional)
 
 An external load balancer can be used for SSL termination and routing if desired.
@@ -116,17 +136,17 @@ The `haproxy` folder contains an example container configuration for an external
 
 A master node is a server node and the first node in the cluster.
 
+> **NOTE:** This playbook supports kickstarting the master node. To enable this set `-e "kickstart=true` in the `ansible-pull` command. This will run the bootstrap service on first boot rather than immediately.
+
 The master node is responsible for bootstrapping the cluster. This node applies the initial configurations to provide minium configuration for further nodes to join.
 
 1. Run the ansible playbook setting the `node_role` variable
     - `ansible-pull -d /etc/local/ansible -C 'ansible-pull' -U https://github.com/Smurf/k3s-cluster.git -e "node_role=master" ansible/local.yml`
-2. Copy the kubectl from the fist node to `~/.kube/config` and modify the `server` value to the `kube-vip` IP
-    - Optionally but not recommended you may just use the IP of the first node.
-3. `kubectl get nodes` should show the master node
-4. `kubectl get svc -A`
-    - Traefik should be accessable via External-IP shown.
+    - This will start `k3s-bootstrap.service` immediately and begin to configure the first node.
+2. `kubectl get nodes` should show the master node
+3. `kubectl get svc -A`
+    - Traefik should be accessable via https at the External-IP shown.
 
-> **NOTE:** This playbook supports kickstarting the master node. To enable this set `-e "kickstart=true` in the `ansible-pull` command.
 
 #### Deploy a Server Node
 
@@ -134,14 +154,14 @@ Server nodes run the control plane and workloads. Clusters should contain a mini
 
 To deploy a server node simply pull the playbook with the appropriate role selected.
 ```
-ansible-pull -d /etc/local/ansible -C 'ansible-pull' -U https://github.com/Smurf/k3s-cluster.git -e "node_role=agent" ansible/local.yml
-```
-
-#### Deploy a Worker Node
-
-Worker nodes only run workloads.
-```
 ansible-pull -d /etc/local/ansible -C 'ansible-pull' -U https://github.com/Smurf/k3s-cluster.git -e "node_role=server" ansible/local.yml
+```
+
+#### Deploy a Agnet Node
+
+Agent nodes only run workloads.
+```
+ansible-pull -d /etc/local/ansible -C 'ansible-pull' -U https://github.com/Smurf/k3s-cluster.git -e "node_role=agent" ansible/local.yml
 ```
 
 ### Deploying A Test Application

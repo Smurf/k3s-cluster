@@ -1,3 +1,8 @@
 - name: Install system-upgrade controller
   ansible.builtin.shell:
     cmd: kubectl apply -f https://raw.githubusercontent.com/rancher/system-upgrade-controller/master/manifests/system-upgrade-controller.yaml
+
+- name: Sync templates to node
+  ansible.posix.synchronize:
+    src: ../manifests/suc
+    dest: /opt/k3s-master/

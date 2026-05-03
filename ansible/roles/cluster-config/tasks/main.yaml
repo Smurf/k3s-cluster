@@ -1,44 +1,46 @@
-- name: Ensure /opt/k3s-master exists
-  ansible.builtin.file:
-    path: /opt/k3s-master
-    state: directory
-    mode: "0644"
+- name: Run tasks for master
   when: node_role == "master"
+  block:
+    - name: Ensure /opt/k3s-master exists
+      ansible.builtin.file:
+        path: /opt/k3s-master
+        state: directory
+      mode: "0644"
 
-- name: Copy over and apply secrets first.
-  ansible.builtin.import_tasks:
-    file: secrets.yaml
-  when: node_role == "master"
+    - name: Copy over and apply secrets first.
+      ansible.builtin.import_tasks:
+        file: secrets.yaml
 
-- name: Check for kube-vip
-  ansible.builtin.import_tasks:
-    file: kube-vip.yaml
-  when: vip
+    - name: Check for kube-vip
+      ansible.builtin.import_tasks:
+        file: kube-vip.yaml
+      when: vip
 
-- name: Check for MetalLB 
-  ansible.builtin.import_tasks:
-    file: metallb.yaml
-  when: metallb
+    - name: Check for MetalLB
+      ansible.builtin.import_tasks:
+        file: metallb.yaml
+      when: metallb
 
-- name: Configure Traefik
-  ansible.builtin.import_tasks:
-    file: traefik.yaml
+    - name: Configure Traefik
+      ansible.builtin.import_tasks:
+        file: traefik.yaml
 
-- name: Configure Monitoring
-  ansible.builtin.import_tasks:
-    file: monitoring.yaml
-  when: monitoring
+    - name: Configure Monitoring
+      ansible.builtin.import_tasks:
+        file: monitoring.yaml
+      when: monitoring
 
-- name: Configure ArgoCD
-  ansible.builtin.import_tasks:
-    file: argocd.yaml
-  when: argocd
+    - name: Configure ArgoCD
+      ansible.builtin.import_tasks:
+        file: argocd.yaml
+      when: argocd
 
-- name: Configure System Update Controller
-  ansible.builtin.import_tasks:
-    file: suc.yaml
+    - name: Configure System Update Controller
+      ansible.builtin.import_tasks:
+        file: suc.yaml
+      when: system_update
 
-- name: Deploy yaml files.
-  ansible.builtin.shell:
-    cmd: |
-      find /opt/k3s-master/ -name '*.yaml' -exec kubectl apply -f {} \;
+    - name: Deploy yaml files.
+      ansible.builtin.shell:
+        cmd: |
+          find /opt/k3s-master/ -name '*.yaml' -exec kubectl apply -f {} \;

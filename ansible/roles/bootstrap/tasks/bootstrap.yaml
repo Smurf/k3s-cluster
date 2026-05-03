@@ -19,10 +19,10 @@
   ansible.builtin.systemd:
     name: k3s-bootstrap.service
     enabled: true
-  when: kickstart 
+  when: kickstart
 
 - name: If not kickstart, Start bootstrap service immediately.
   ansible.builtin.systemd:
     name: k3s-bootstrap.service
-    started: true
+    state: started
   when: not kickstart

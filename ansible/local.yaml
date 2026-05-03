@@ -5,4 +5,4 @@
     - roles/firewalld-init
     - roles/le-staging-init
     - roles/nodes-init
-    - roles/first-boot
+    - roles/bootstrap

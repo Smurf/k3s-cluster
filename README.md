@@ -141,7 +141,7 @@ A master node is a server node and the first node in the cluster.
 The master node is responsible for bootstrapping the cluster. This node applies the initial configurations to provide minium configuration for further nodes to join.
 
 1. Run the ansible playbook setting the `node_role` variable
-    - `ansible-pull -d /etc/local/ansible -C 'ansible-pull' -U https://github.com/Smurf/k3s-cluster.git -e "node_role=master" ansible/local.yml`
+    - `ansible-pull -d /etc/local/ansible -C 'ansible-pull' -U https://github.com/Smurf/k3s-cluster.git -e "node_role=master" ansible/local.yaml`
     - This will start `k3s-bootstrap.service` immediately and begin to configure the first node.
 2. `kubectl get nodes` should show the master node
 3. `kubectl get svc -A`
@@ -154,14 +154,14 @@ Server nodes run the control plane and workloads. Clusters should contain a mini
 
 To deploy a server node simply pull the playbook with the appropriate role selected.
 ```
-ansible-pull -d /etc/local/ansible -C 'ansible-pull' -U https://github.com/Smurf/k3s-cluster.git -e "node_role=server" ansible/local.yml
+ansible-pull -d /etc/local/ansible -C 'ansible-pull' -U https://github.com/Smurf/k3s-cluster.git -e "node_role=server" ansible/local.yaml
 ```
 
 #### Deploy a Agnet Node
 
 Agent nodes only run workloads.
 ```
-ansible-pull -d /etc/local/ansible -C 'ansible-pull' -U https://github.com/Smurf/k3s-cluster.git -e "node_role=agent" ansible/local.yml
+ansible-pull -d /etc/local/ansible -C 'ansible-pull' -U https://github.com/Smurf/k3s-cluster.git -e "node_role=agent" ansible/local.yaml
 ```
 
 ### Deploying A Test Application

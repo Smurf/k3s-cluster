@@ -1,4 +1,4 @@
 - name: If master node create first boot tasks to init cluster
-  when: node_role == "master" and kickstart is defined and kickstart
+  when: node_role == "master"
   ansible.builtin.import_tasks:
-    file: first-boot.yml
+    file: bootstrap.yaml

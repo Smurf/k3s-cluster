@@ -1,11 +1,11 @@
 - name: Run tasks for master
   when: node_role == "master"
   block:
-    - name: Ensure \/opt\/k3s-master exists
+    - name: Ensure opt k3s-master exists
       ansible.builtin.file:
         path: /opt/k3s-master
         state: directory
-      mode: "0644"
+        mode: 0644
 
     - name: Copy over and apply secrets first.
       ansible.builtin.import_tasks:

@@ -6,11 +6,11 @@
         cmd: /usr/local/bin/kubectl apply -f https://kube-vip.io/manifests/rbac.yaml
     - name: Pull kube-vip image
       ansible.builtin.shell:
-        cmd: /usr/local/bin/ctr image pull ghcr.io/kube-vip/kube-vip:v0.4.4
+        cmd: /usr/local/bin/ctr image pull ghcr.io/kube-vip/kube-vip:v1.2.0
     - name: Create manifest
       ansible.builtin.shell:
         cmd: |
-          alias kube-vip="ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v0.4.4 vip /kube-vip"
+          alias kube-vip="ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:v1.2.0 vip /kube-vip"
           kube-vip manifest daemonset \
           --interface {{ ansible_default_ipv4.interface }} \
           --address {{ vip_ip }} \
